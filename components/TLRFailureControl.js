@@ -192,10 +192,19 @@ valvoleStyle.addRules([
     }//aggiungere i simboli degli elementi che mancano
   }),
   new OpenLayers.Rule({
-    filter: new OpenLayers.Filter.Comparison({
-      type: OpenLayers.Filter.Comparison.EQUAL_TO,
-      property: "simbolo",
-      value: "sp"
+    filter: new OpenLayers.Filter.Logical({
+      filters: [
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "escluso",
+        value: 0
+      }),
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "simbolo",
+        value: "sp"
+      })],
+      type: OpenLayers.Filter.Logical.AND
     }),
     symbolizer: {
       strokeColor: "#ff00ff",//verdino
@@ -210,13 +219,77 @@ valvoleStyle.addRules([
     }//aggiungere i simboli degli elementi che mancano  
   }),
   new OpenLayers.Rule({
-    filter: new OpenLayers.Filter.Comparison({
-      type: OpenLayers.Filter.Comparison.EQUAL_TO,
-      property: "simbolo",
-      value: "iren"
+    filter: new OpenLayers.Filter.Logical({
+      filters: [
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "escluso",
+        value: 1
+      }),
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "simbolo",
+        value: "sp"
+      })],
+      type: OpenLayers.Filter.Logical.AND
+    }),
+    symbolizer: {
+      strokeColor: "red",//verdino
+      strokeOpacity: 1,
+      strokeWidth: 4,
+      strokeLinecap: "round",
+      strokeDashstyle: "solid", 
+      pointRadius: 10,
+      pointerEvents: "visiblePainted",
+      cursor: "inherit",
+      graphicName: "star"
+    }//aggiungere i simboli degli elementi che mancano  
+  }),
+  new OpenLayers.Rule({
+    filter: new OpenLayers.Filter.Logical({
+      filters: [
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "escluso",
+        value: 0
+      }),
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "simbolo",
+        value: "iren"
+      })],
+      type: OpenLayers.Filter.Logical.AND
     }),
     symbolizer: {
       strokeColor: "#ff00ff",//verdino
+      strokeOpacity: 1,
+      strokeWidth: 4,
+      strokeLinecap: "round",
+      strokeDashstyle: "solid", 
+      pointRadius: 10,
+      pointerEvents: "visiblePainted",
+      cursor: "inherit",
+      graphicName: "cross"
+    }//aggiungere i simboli degli elementi che mancano
+  }),
+
+  new OpenLayers.Rule({
+    filter: new OpenLayers.Filter.Logical({
+      filters: [
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "escluso",
+        value: 1
+      }),
+      new OpenLayers.Filter.Comparison({
+        type: OpenLayers.Filter.Comparison.EQUAL_TO,
+        property: "simbolo",
+        value: "iren"
+      })],
+      type: OpenLayers.Filter.Logical.AND
+    }),
+    symbolizer: {
+      strokeColor: "red",//verdino
       strokeOpacity: 1,
       strokeWidth: 4,
       strokeLinecap: "round",
@@ -335,7 +408,7 @@ OpenLayers.GisClient.ClickTlr = OpenLayers.Class(OpenLayers.Control, {
   }
 });
 
-var click = new OpenLayers.GisClient.ClickTlr();
+var clickTlr = new OpenLayers.GisClient.ClickTlr();
 
 OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
   EVENT_TYPES: ["beforeSelect","afterSelect","selected"],
@@ -400,15 +473,6 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
             window.alert("E' necessario che un elemento sia selezionato per poter procedere all'inserimento della barriera.");
             return;
           } else {
-            //v = this.selectedBranch.fid.split('.');
-            //var s = this.include.indexOf(v[1]);
-            //console.log(v[1]);
-            //if(!confirm('Si intende '+(s<0 ? "inserire" : "rimuovere")+' la barriera '+(s<0 ? "dal" : "nel")+' grafo?'))
-            //  return;
-            //if(s<0)
-            //  this.include.push(v[1]);
-            //else
-            //  this.include.splice(s, 1);
             var point = this.map.getLonLatFromPixel(geometry.xy);
             geometry = new OpenLayers.Geometry.Point(point.lon, point.lat);
             if(this.selectedBranch!=null) {
@@ -430,13 +494,11 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
         window.alert("Per inserire una barriera è necessario prima produrre un grafico");
         return;
       }
-      //var point = this.map.getLonLatFromPixel(geometry.xy);// : this.map.get;
-      //geometry = new OpenLayers.Geometry.Point(point.lon, point.lat);
     } else {
       console.log("Ho selezionato una geometria");
       return;
     }
-    click.deactivate();
+    clickTlr.deactivate();
     this.loadingControl.maximizeControl();
     //CHIAMATA AL SERVER PER AVERE DATO IL PUNTO LA TRATTA DEL GRAFO E L'ELENCO DEGLI OGGETTI INTERESSATI
     var carmelo = this.selectedBranch;
@@ -452,21 +514,18 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
           barN: (v==null ? null : [v.x, v.y])
         },
         success: function(request) {
-          //console.log(carmelo);
-          click.activate();
+          clickTlr.activate();
           this.loadingControl.minimizeControl();
           this.loadResult(request, carmelo);
-          //window.alert("FINE");
         },
         failure:function(){
-          click.activate();
+          clickTlr.activate();
           this.loadingControl.minimizeControl();
           window.alert('Si è verificato un errore durante la generazione del grafo.');
         },
         scope: this
     };
-    OpenLayers.Request.GET(options);
-    
+    OpenLayers.Request.GET(options); 
   },
   //seleziona una geometria... e non lo fai se c'è una popup aperta
   select: function(geometry) {
@@ -483,6 +542,7 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
 	      resultLayer.removeAllFeatures();
               this.exclude = [];
               this.include = [];
+              this.resultFeatures = [];
             }
           } else {
             v = this.selectedObjectId.split('.');
@@ -503,8 +563,7 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
       console.log("Ho selezionato una geometria");
       return;
     }
-    //this.handler.deactivate();
-    click.deactivate();
+    clickTlr.deactivate();
     this.loadingControl.maximizeControl();
     if(call) {
       //CHIAMATA AL SERVER PER AVERE DATO IL PUNTO LA TRATTA DEL GRAFO E L'ELENCO DEGLI OGGETTI INTERESSATI
@@ -520,14 +579,12 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
           include:this.include
         },
         success: function(request) {
-          //console.log(carmelo);
-          click.activate();
+          clickTlr.activate();
           this.loadingControl.minimizeControl();
           this.loadResult(request, carmelo);
         },
         failure:function(){
-          //this.handler.activate();
-          click.activate();
+          clickTlr.activate();
           this.loadingControl.minimizeControl();
           window.alert('Si è verificato un errore durante la generazione del grafo.');
         },
@@ -538,27 +595,41 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
       var resultLayer = this.getResultLayer();
       var arr = this.ricalcolaRimuovendo(this.selectedObjectId, resultLayer.features, false);
       resultLayer.removeFeatures(arr);
-      //this.handler.activate();
-      click.activate();
+      clickTlr.activate();
       this.loadingControl.minimizeControl();
     }
   },
   ricalcolaRimuovendo: function(selObj, features, remove) {
     var arr = [];
+    var index = 0;
     for(index in features) {
-      if(features[index].attributes['parentObject']==selObj) {
+      if(features[index].attributes['parentObject']==selObj && selObj!==null) {
         //discrimina sul tipo
         var v = features[index].fid.split(".");
-        //console.log(v[0]+"-"+v[1]);
-        if((v[0]!='condotta') && (v[0]!='centrale IREN') && (v[0]!='stazione di pompaggio') && (v[0]!='sottostazione utenza'))
+        if((v[0]!='condotta') /*&& (v[0]!='centrale IREN') && (v[0]!='stazione di pompaggio')*/ && (v[0]!='sottostazione utenza'))
           //roba manovrabile
           arr = arr.concat(this.ricalcolaRimuovendo(features[index].fid, features, true));
+        //console.log("A-"+index+". Rimuovo:" + features[index].fid + " con index " + index + " e parent:" + features[index].attributes['parentObject']);
         arr.push(features[index]);
       } else if(features[index].fid==selObj) {
         features[index].attributes["escluso"] = 0;
         if(remove) {
+          //console.log("B-"+index+". Rimuovo " + features[index].fid);
           arr.push(features[index]);
           sal = features[index].fid.split('.');
+          for(keyFeature in this.resultFeatures) {
+            ff = false;
+            if (sal[0]==keyFeature){
+              for(obj in this.resultFeatures[keyFeature].features.features)
+                if(this.resultFeatures[keyFeature].features.features[obj].id == features[index].fid) {
+                  this.resultFeatures[keyFeature].features.features.splice(this.resultFeatures[keyFeature].features.features[obj], 1);
+                  ff = true;
+                  break;
+                }    
+              }
+              if(ff)
+                break;
+          }
           var s = this.exclude.indexOf(sal[1]);
           if(s>=0)
             this.exclude.splice(s, 1);
@@ -653,6 +724,7 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
         resultLayer.removeAllFeatures();
         this.include = [];
 	this.exclude = [];
+        this.resultFeatures = [];
       }
     }
   },
@@ -667,7 +739,7 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
     var feature = e.feature;
     var v = e.feature.fid.split('.');
     var featureType = this.resultFeatures[v[0]]["featureType"];
-    var popupInfo = "<div><h3><u>"+ featureType.title+ /*" - " + v[1] +*/"</u></h3></div><br>";
+    var popupInfo = "<div><h3><u>"+ featureType.title+ "</u></h3></div><br>";
     var property;
     for (key in featureType.properties) {
       property = featureType.properties[key];
@@ -676,7 +748,8 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
       popupInfo += "<div style='margin-left: 10px; margin-right: 10px; text-align: left;'><b>" + property.fieldHeader + ":</b>&nbsp;" + apn + "</div>";
     }
     this.setMessage(popupInfo);
-    if((v[0]!='condotta') && (v[0]!='centrale IREN') && (v[0]!='stazione di pompaggio') && (v[0]!='sottostazione utenza') && (v[0]!='altro')) {
+    //20210222 MZ -> rimuovo la centrale IREN e la stazione di pompaggio per escluderle dai conti
+    if((v[0]!='condotta') /*&& (v[0]!='centrale IREN') && (v[0]!='stazione di pompaggio')*/ && (v[0]!='sottostazione utenza') && (v[0]!='altro')) {
       this.selectedObjectId = e.feature.fid;//v[1];
       this.selectedBranch = null;
       this.selectedOtherId = null;
@@ -694,19 +767,18 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
     }
   },
   export: function(index, text) {
-    click.deactivate();
+    clickTlr.deactivate();
     this.loadingControl.maximizeControl();
     if(index==0) {
       window.alert("E' necessario specificare un corretto tipo di report per procedere.");
-      click.activate();
+      clickTlr.activate();
       this.loadingControl.minimizeControl();
     } else {
       var jsonInput = [];
       //algoritmo per il report... manca lato server
       for(keyFeature in this.resultFeatures) {
         if((index=="1" && keyFeature=='condotta') ||
-          (index=="2" && (keyFeature.startsWith("valvola") || keyFeature.startsWith("sottostazione"))) ||
-          //keyFeature.startsWith("camera") || keyFeature.startsWith("pozzetto")))||
+          (index=="2" && (keyFeature.startsWith("valvola") || keyFeature.startsWith("camera") || keyFeature.startsWith("pozzetto") || keyFeature.startsWith("stazione") || keyFeature.startsWith("centrale"))) ||
           (index=="3" && keyFeature.startsWith("sottostazione"))) {
           for(obj in this.resultFeatures[keyFeature].features.features) {
             var pirulino = new Object();
@@ -736,13 +808,11 @@ OpenLayers.Control.TLRFailureSelect = OpenLayers.Class(OpenLayers.Control, {
         a.download = 'output_'+text+'_'+(new Date().getTime())+'.csv';
         a.click();
         URL.revokeObjectURL(url);
-        //this.handler.activate();
-        click.activate();
+        clickTlr.activate();
         self.loadingControl.minimizeControl();
       }).fail(function (err) {
         alert("ERRORE: " + err);
-        //this.handler.activate();
-        click.activate();
+        clickTlr.activate();
         self.loadingControl.minimizeControl();
       });
     }
@@ -793,9 +863,9 @@ OpenLayers.GisClient.TLRFailureToolbar = OpenLayers.Class(OpenLayers.Control.Pan
           GisClientMap.map.currentControl.deactivate();
         GisClientMap.map.currentControl = flagCtrl;
         clickete.activate();
-        this.map.addControl(click);
-        click.setFlag(true);
-        click.activate();
+        this.map.addControl(clickTlr);
+        clickTlr.setFlag(true);
+        clickTlr.activate();
         this.active = true;
       },
       deactivate: function() {
@@ -809,8 +879,8 @@ OpenLayers.GisClient.TLRFailureToolbar = OpenLayers.Class(OpenLayers.Control.Pan
           GisClientMap.map.currentControl.activate();
           GisClientMap.map.currentControl.active = true;
           clickete.deactivate();
-          click.deactivate();
-          this.map.removeControl(click);
+          clickTlr.deactivate();
+          this.map.removeControl(clickTlr);
         }
         this.active = false;
       }
@@ -835,9 +905,9 @@ OpenLayers.GisClient.TLRFailureToolbar = OpenLayers.Class(OpenLayers.Control.Pan
           GisClientMap.map.currentControl.deactivate();
         GisClientMap.map.currentControl = omCtrl;
         clickete.activate();
-        this.map.addControl(click);
-        click.setFlag(false);
-        click.activate();
+        this.map.addControl(clickTlr);
+        clickTlr.setFlag(false);
+        clickTlr.activate();
         this.active = true;
       },
       deactivate: function() {
@@ -851,8 +921,8 @@ OpenLayers.GisClient.TLRFailureToolbar = OpenLayers.Class(OpenLayers.Control.Pan
           GisClientMap.map.currentControl.activate();
           GisClientMap.map.currentControl.active = true;
           clickete.deactivate();
-          click.deactivate();
-          this.map.removeControl(click);
+          clickTlr.deactivate();
+          this.map.removeControl(clickTlr);
         }
         this.active = false;
       }
