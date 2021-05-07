@@ -1,7 +1,24 @@
-clientConfig.CLIENT_COMPONENTS.push("gisclient-maps_failure:failureControl:3:mtools");
-clientConfig.PLUGINS_CONFIG["domain_Failure"] = "TLR";
-clientConfig.PLUGINS_CONFIG["reteLabel_Failure"] = "condotta";
-clientConfig.PLUGINS_CONFIG["terminaleLabel_Failure"] = "sottostazione utenza";
+//clientConfig.CLIENT_COMPONENTS.push("gisclient-maps_failure:failureControl:3:mtools");
+//clientConfig.PLUGINS_CONFIG["domain_Failure"] = "TLR";
+//clientConfig.PLUGINS_CONFIG["reteLabel_Failure"] = array("condotta");
+//clientConfig.PLUGINS_CONFIG["terminaleLabel_Failure"] = array("sottostazione utenza");
+clientConfig.PLUGINS_CONFIG["failure"] = {
+	pluginLayers: ['t_schema_funzionale.condotte_tratte'],
+	pluginDOMElements: [
+		{
+			type:'div',
+            		id: 'map-toolbar-pipeselect-commander',
+			parent: 'map-toolbars',
+			class: ['olToolbarsControl']
+        	}
+	],
+	pluginComponents: ['gisclient-maps_failure:failureControl:3:mtools'],
+	pluginClientConfig: {
+		DOMAIN_FAILURE : 'TLR',
+		RETELABEL_FAILURE : ["condotta"],
+		TERMINALELABEL_FAILURE : ["sottostazione utenza"]
+	}
+}
 
 function valvoleStyle() {
 	valvoleStyle = new OpenLayers.Style();

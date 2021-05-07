@@ -207,7 +207,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 				y:geometry.y,//presente
 				exclude:this.exclude,//presente
 				include:this.include,
-				domain: clientConfig.PLUGINS_CONFIG["domain_Failure"],
+				domain: clientConfig.DOMAIN_FAILURE,
 				barN: (v==null ? null : [v.x, v.y])
 			},
 			success: function(request) {
@@ -274,7 +274,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 					y:geometry.y,//presente
 					exclude:this.exclude,//presente
 					include:this.include,
-					domain: clientConfig.PLUGINS_CONFIG["domain_Failure"]
+					domain: clientConfig.DOMAIN_FAILURE
 				},
 				success: function(request) {
 					clickFailure.activate();
@@ -304,7 +304,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 			if(features[index].attributes['parentObject']==selObj && selObj!==null) {
 				//discrimina sul tipo
 				var v = features[index].fid.split(".");
-				if((v[0]!=clientConfig.PLUGINS_CONFIG["reteLabel_Failure"]) && (v[0]!=clientConfig.PLUGINS_CONFIG["terminaleLabel_Failure"])) //roba manovrabile
+				if(!in_array(v[0],clientConfig.RETELABEL_FAILURE) && !in_array(v[0],clientConfig.TERMINALELABEL_FAILURE)) //roba manovrabile
 					arr = arr.concat(this.ricalcolaRimuovendo(features[index].fid, features, true));
 				arr.push(features[index]);
 			} else if(features[index].fid==selObj) {
@@ -433,6 +433,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 		var attributes = e.feature.attributes;
 		var feature = e.feature;
 		var v = e.feature.fid.split('.');
+console.log(e.feature.fid);
 		var featureType = this.resultFeatures[v[0]]["featureType"];
 		var popupInfo = "<div><h3><u>"+ featureType.title+ "</u></h3></div><br>";
 		var property;
@@ -446,13 +447,13 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 		}
 		this.setMessage(popupInfo);
 		//20210222 MZ -> rimuovo la centrale IREN e la stazione di pompaggio per escluderle dai conti
-		if((v[0]!=clientConfig.PLUGINS_CONFIG["reteLabel_Failure"]) && (v[0]!=clientConfig.PLUGINS_CONFIG["terminaleLabel_Failure"]) && (v[0]!='altro')) {
+		if(!in_array(v[0],clientConfig.RETELABEL_FAILURE) && !in_array(v[0],clientConfig.TERMINALELABEL_FAILURE) && (v[0]!='altro')) {
 			this.selectedObjectId = e.feature.fid;
 			this.selectedBranch = null;
 			this.selectedOtherId = null;
 			this.toolbar.redraw();
 		} else {
-			if(v[0]==clientConfig.PLUGINS_CONFIG["reteLabel_Failure"]) {
+			if(in_array(v[0],clientConfig.RETELABEL_FAILURE)) {
 				this.selectedBranch = e.feature;
 				this.selectedOtherId = null
 			} else if(v[0]=='altro') {
@@ -517,7 +518,7 @@ OpenLayers.GisClient.FailureToolbar = OpenLayers.Class(OpenLayers.Control.Panel,
 		clickete = new OpenLayers.Control.FailureSelect({
 			clearOnDeactivate:true,
 			serviceURL:'/gisclient3/services/iren/findFailure.php',
-			exportURL:'/gisclient3/services/iren/export'+clientConfig.PLUGINS_CONFIG["domain_Failure"]+'Failure.php',
+			exportURL:'/gisclient3/services/iren/export'+clientConfig.DOMAIN_FAILURE+'Failure.php',
 			distance:50,
 			highLight: true,
 			map : dd,
@@ -697,6 +698,14 @@ function hideSearchCursor(e) {
 	$("#tooltip").css({});
 }
 
+function in_array(needle, haystack) {
+    var length = haystack.length;
+    for(var i = 0; i < length; i++) {
+        if(haystack[i] == needle) return true;
+    }
+    return false;
+}
+
 var cssId = 'myCss';
 if (!document.getElementById(cssId)) {
 	var head  = document.getElementsByTagName('head')[0];
@@ -722,7 +731,7 @@ window.GCComponents["Controls"].addControl('control-pipeselect-commander', funct
 // **** Toolbar button
 window.GCComponents["SideToolbar.Buttons"].addButton (
 	'button-FailureSelect',
-  	'Ricerca guasti '+clientConfig.PLUGINS_CONFIG["domain_Failure"],
+  	'Ricerca guasti '+clientConfig.DOMAIN_FAILURE,
 	'glyphicon-white glyphicon-tint',
 	function() {
 		if (sidebarPanel.handleEvent || typeof(sidebarPanel.handleEvent) === 'undefined') {
