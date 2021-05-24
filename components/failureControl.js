@@ -1,6 +1,7 @@
 OpenLayers.Renderer.symbol.lightning = [0, 0, 4, 2, 6, 0, 10, 5, 6, 3, 4, 5, 0, 0];
+console.log("Prova");
+var valvoleStyle = clientConfig.VALVOLA_STYLE();
 
-var valvoleStyle = valvoleStyle();
 valvoleStyle.addRules([
 	new OpenLayers.Rule({
 		filter: new OpenLayers.Filter.Comparison({
@@ -433,7 +434,6 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 		var attributes = e.feature.attributes;
 		var feature = e.feature;
 		var v = e.feature.fid.split('.');
-console.log(e.feature.fid);
 		var featureType = this.resultFeatures[v[0]]["featureType"];
 		var popupInfo = "<div><h3><u>"+ featureType.title+ "</u></h3></div><br>";
 		var property;
@@ -472,7 +472,7 @@ console.log(e.feature.fid);
 			clickFailure.activate();
 			this.loadingControl.minimizeControl();
 		} else {
-			var jsonIn = jsonInput(this.resultFeatures, index);
+			var jsonIn = clientConfig.JSON_INPUT(this.resultFeatures, index);
 			var self = this;
 			$.ajax({
 				type: "POST",
@@ -658,7 +658,7 @@ OpenLayers.GisClient.FailureToolbar = OpenLayers.Class(OpenLayers.Control.Panel,
 		OpenLayers.Control.Panel.prototype.redraw.apply(this);
 		if(this.active) {
 			this.div.style.display="block";
-			this.div.appendChild(customReportDiv());
+			this.div.appendChild(customReportDiv(clientConfig.OPTIONS_LIST));
 			var infoDiv = this.getInfoDiv();
 			if(infoDiv!=undefined && expandCtrl.active)
 				this.div.appendChild(infoDiv);
@@ -705,6 +705,29 @@ function in_array(needle, haystack) {
     }
     return false;
 }
+
+function customReportDiv(list) {
+	var span = document.createElement("div");
+	span.style.float = "right";
+	span.style.marginTop = "5px";
+	span.style.marginRight = "5px";
+	var rpList = document.createElement("select");
+	rpList.id = "reportList";
+	rpList.add(getOption("SELEZIONA REPORT",0));
+	list.forEach(function(item, index) {
+		rpList.add(getOption(item, index+1));
+	});
+	span.innerHTML = rpList.outerHTML;
+	return span;
+}
+
+function getOption(text,value) {
+        option = document.createElement("option");
+        option.text=text;
+        option.value=value;
+        return option;
+}
+
 
 var cssId = 'myCss';
 if (!document.getElementById(cssId)) {
