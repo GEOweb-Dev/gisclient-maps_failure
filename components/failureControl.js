@@ -1,5 +1,4 @@
 OpenLayers.Renderer.symbol.lightning = [0, 0, 4, 2, 6, 0, 10, 5, 6, 3, 4, 5, 0, 0];
-console.log("Prova");
 var valvoleStyle = clientConfig.VALVOLA_STYLE();
 
 valvoleStyle.addRules([
@@ -434,7 +433,8 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 		var attributes = e.feature.attributes;
 		var feature = e.feature;
 		var v = e.feature.fid.split('.');
-		var featureType = this.resultFeatures[v[0]]["featureType"];
+		var arrElem = (e.feature.attributes.tipo!=undefined);
+		var featureType = arrElem ? this.resultFeatures[v[0]]["featureType"][e.feature.attributes.tipo] : this.resultFeatures[v[0]]["featureType"];
 		var popupInfo = "<div><h3><u>"+ featureType.title+ "</u></h3></div><br>";
 		var property;
 		for (key in featureType.properties) {
@@ -664,7 +664,6 @@ OpenLayers.GisClient.FailureToolbar = OpenLayers.Class(OpenLayers.Control.Panel,
 				this.div.appendChild(infoDiv);
 			this.div.style.height= ((infoDiv!=undefined && expandCtrl.active) ? "250px" : "30px");
 			this.div.style.width = "325px";
-			console.log("redraw");
 		} else
 			this.div.style.display="none";
 	},
