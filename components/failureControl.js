@@ -213,7 +213,11 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 			success: function(request) {
 				clickFailure.activate();
 				this.loadingControl.minimizeControl();
-				this.loadResult(request, carmelo);
+				var ind = request.responseText.indexOf('SQLSTATE - ');
+				if(ind == 0)
+					window.alert(request.responseText.substring(11));
+				else
+					this.loadResult(request, carmelo);
 			},
 			failure:function(){
 				clickFailure.activate();
@@ -279,7 +283,11 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 				success: function(request) {
 					clickFailure.activate();
 					this.loadingControl.minimizeControl();
-					this.loadResult(request, carmelo);
+					var ind = request.responseText.indexOf('SQLSTATE - ');
+					if(ind == 0)
+						window.alert(request.responseText.substring(11));
+					else
+						this.loadResult(request, carmelo);
 				},
 				failure:function(){
 					clickFailure.activate();
