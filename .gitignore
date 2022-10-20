@@ -1,0 +1,6 @@
+.svn/
+config/config.acquafailure.js
+config/config.elebtfailure.js
+config/config.elefailure.js
+config/config.gasfailure.js
+config/config.tlrfailure.js

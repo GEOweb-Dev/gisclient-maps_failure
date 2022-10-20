@@ -68,7 +68,7 @@ var styleMap = new OpenLayers.StyleMap({
 		fillOpacity: 0.2,
 		hoverFillColor: "white",
 		hoverFillOpacity: 0.8,
-		strokeColor: "#00ffff",
+		strokeColor: clientConfig.TEMP_STROKECOLOR,//"ele: #C9A8FF, altri: #00ffff",
 		strokeOpacity: 1,
 		strokeLinecap: "round",
 		strokeWidth: 4,
@@ -222,7 +222,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 			failure:function(){
 				clickFailure.activate();
 				this.loadingControl.minimizeControl();
-				window.alert('Si è verificato un errore durante la generazione del grafo.');
+				window.alert('verificato un errore durante la generazione del grafo.');
 			},
 			scope: this
 		};
@@ -247,6 +247,13 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 						}
 					} else {
 						v = this.selectedObjectId.split('.');
+						//controlla se la lunghezza è >2... nel caso lo sia, controlla il valore v[2] e poi dì cosa trovi... se è manovrabile o no...
+						//if(v.length > 2){
+						//	if(v[2]==="false"){
+						//		alert("Impossibile da manovrare: verifica l'informazione di stato.");
+						//		return;
+						//	}
+						//}
 						var s = this.exclude.indexOf(v[1]);
 						if(!confirm('Si intende '+(s<0 ? "escludere" : "includere")+' il nodo '+(s<0 ? "dal" : "nel")+' grafo?'))
 							return;
@@ -255,6 +262,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 						else
 							this.exclude.splice(s, 1);
 						call = (s<0);
+						
 					}
 				}
 			}
@@ -280,7 +288,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 					include:this.include,
 					domain: clientConfig.DOMAIN_FAILURE
 				},
-				success: function(request) {
+				success: function(request){
 					clickFailure.activate();
 					this.loadingControl.minimizeControl();
 					var ind = request.responseText.indexOf('SQLSTATE - ');
@@ -289,7 +297,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 					else
 						this.loadResult(request, carmelo);
 				},
-				failure:function(){
+				failure:function(ee){
 					clickFailure.activate();
 					this.loadingControl.minimizeControl();
 					window.alert('Si è verificato un errore durante la generazione del grafo.');
@@ -352,6 +360,10 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 		} else 
 			this.setMessage("");
 		var result = formatJson.read(doc);
+		if(result.error!==undefined){
+			window.alert(result.error);
+			return;
+		}
 		var extent = result.features_extent;
 		this.resultFeatures = result;
 		var resultLayer = this.getResultLayer();
