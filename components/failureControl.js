@@ -115,7 +115,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 	EVENT_TYPES: ["beforeSelect","afterSelect","selected"],
 	type: OpenLayers.Control.TYPE_BUTTON,
 	clearOnDeactivate: false,
-	distance:5,
+	//distance: clientConfig.OFFSET,
 	serviceURL:null,
 	exportURL:null,
 	include:[],
@@ -123,6 +123,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 	selectControl:null,
 	highlightCtrl:null,
 	selectedObjectId: null,
+	selectedObject: null,
 	selectedBranch: null,
 	selectedOtherId: null,
 	selectionSymbolizer: {
@@ -213,11 +214,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 			success: function(request) {
 				clickFailure.activate();
 				this.loadingControl.minimizeControl();
-				var ind = request.responseText.indexOf('SQLSTATE - ');
-				if(ind == 0)
-					window.alert(request.responseText.substring(11));
-				else
-					this.loadResult(request, carmelo);
+				this.loadResult(request, carmelo);
 			},
 			failure:function(){
 				clickFailure.activate();
@@ -232,6 +229,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 	select: function(geometry) {
 		var v = null;
 		var call = true;
+		var help = null;
 		if (!(geometry instanceof OpenLayers.Geometry)) {
 			var resultLayer = this.getResultLayer();
 			if (resultLayer) {
@@ -247,19 +245,15 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 						}
 					} else {
 						v = this.selectedObjectId.split('.');
-						//controlla se la lunghezza è >2... nel caso lo sia, controlla il valore v[2] e poi dì cosa trovi... se è manovrabile o no...
-						//if(v.length > 2){
-						//	if(v[2]==="false"){
-						//		alert("Impossibile da manovrare: verifica l'informazione di stato.");
-						//		return;
-						//	}
-						//}
 						var s = this.exclude.indexOf(v[1]);
 						if(!confirm('Si intende '+(s<0 ? "escludere" : "includere")+' il nodo '+(s<0 ? "dal" : "nel")+' grafo?'))
 							return;
-						if(s<0)
+						if(s<0){
 							this.exclude.push(v[1]);
-						else
+							//debugger;
+							var point = this.map.getLonLatFromPixel(this.selectedObject.geometry.xy);// : this.map.get;
+							help = this.selectedObject.geometry;//new OpenLayers.Geometry.Point(point.lon, point.lat);
+						} else
 							this.exclude.splice(s, 1);
 						call = (s<0);
 						
@@ -267,7 +261,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 				}
 			}
 			var point = this.map.getLonLatFromPixel(geometry.xy);// : this.map.get;
-			geometry = new OpenLayers.Geometry.Point(point.lon, point.lat);
+			geometry = (help==null ? new OpenLayers.Geometry.Point(point.lon, point.lat): help);
 		} else {
 			console.log("Ho selezionato una geometria");
 			return;
@@ -445,6 +439,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 	},
 	emptyDiv: function(e) {
 		this.selectedObjectId = null;
+		this.selectedObject = null;
 		this.selectedBranch = null;
 		this.setMessage("");  
 		this.toolbar.redraw();
@@ -468,6 +463,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 		this.setMessage(popupInfo);
 		//20210222 MZ -> rimuovo la centrale IREN e la stazione di pompaggio per escluderle dai conti
 		if(!in_array(v[0],clientConfig.RETELABEL_FAILURE) && !in_array(v[0],clientConfig.TERMINALELABEL_FAILURE) && (v[0]!='altro')) {
+			this.selectedObject = e.feature;
 			this.selectedObjectId = e.feature.fid;
 			this.selectedBranch = null;
 			this.selectedOtherId = null;
@@ -481,6 +477,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 				this.selectedOtherId = v[1];
 			}
 			this.selectedObjectId = null;
+			this.selectedObject = null;
 			this.toolbar.redraw();
 		}
 	},
@@ -539,7 +536,8 @@ OpenLayers.GisClient.FailureToolbar = OpenLayers.Class(OpenLayers.Control.Panel,
 			clearOnDeactivate:true,
 			serviceURL:'/gisclient3/services/iren/findFailure.php',
 			exportURL:'/gisclient3/services/iren/export'+clientConfig.DOMAIN_FAILURE+'Failure.php',
-			distance:50,
+			//distance:50,
+			distance: clientConfig.OFFSET,
 			highLight: true,
 			map : dd,
 			toolbar: self
