@@ -11,10 +11,11 @@ clientConfig.PLUGINS_CONFIG["failureH2O"] = {
 	pluginComponents: ['gisclient-maps_failure:failureControl:3:mtools'],
 	pluginClientConfig: {
 	 	OPTIONS_LIST: [],	
-                DOMAIN_FAILURE : 'Acqua',
+        DOMAIN_FAILURE : 'Acqua',
 		RETELABEL_FAILURE : ["condotta"],
 		TERMINALELABEL_FAILURE : ["utenza","scarico", "idrante"],
 		TEMP_STROKECOLOR : "#C9A8FF",
+		OFFSET: 50,
 		VALVOLA_STYLE: function() {
 			valvoleStyle = new OpenLayers.Style();
 			valvoleStyle.addRules([
