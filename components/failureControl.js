@@ -209,7 +209,8 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 				exclude:this.exclude,//presente
 				include:this.include,
 				domain: clientConfig.DOMAIN_FAILURE,
-				barN: (v==null ? null : [v.x, v.y])
+				barN: (v==null ? null : [v.x, v.y]),
+				custom: clientConfig.CUSTOM_VAL
 			},
 			success: function(request) {
 				clickFailure.activate();
@@ -280,7 +281,8 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 					y:geometry.y,//presente
 					exclude:this.exclude,//presente
 					include:this.include,
-					domain: clientConfig.DOMAIN_FAILURE
+					domain: clientConfig.DOMAIN_FAILURE,
+					custom: clientConfig.CUSTOM_VAL
 				},
 				success: function(request){
 					clickFailure.activate();
@@ -656,7 +658,16 @@ OpenLayers.GisClient.FailureToolbar = OpenLayers.Class(OpenLayers.Control.Panel,
 				self.redraw();
 			}
 		});
-		this.addControls([omCtrl, flagCtrl, expandCtrl, reportCtrl]);
+		btts = [omCtrl, flagCtrl, expandCtrl, reportCtrl];
+		if(clientConfig.CUSTOM_CONTROL!=null)
+			btts[4]= new OpenLayers.Control.Button($.extend(clientConfig.CUSTOM_CONTROL,{activate: function() {
+				OpenLayers.Control.Button.prototype.activate.call(this);
+				this.c_activate();
+			}, deactivate: function(){
+				OpenLayers.Control.Button.prototype.deactivate.call(this);
+				this.c_deactivate();
+			}}));	
+		this.addControls(btts);
 	},
 	getInfoDiv: function() {
 		var log = clickete.getMessage();

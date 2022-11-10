@@ -16,6 +16,7 @@ clientConfig.PLUGINS_CONFIG["failureH2O"] = {
 		TERMINALELABEL_FAILURE : ["utenza","scarico", "idrante"],
 		TEMP_STROKECOLOR : "#C9A8FF",
 		OFFSET: 50,
+		CUSTOM_CONTROLS : [],
 		VALVOLA_STYLE: function() {
 			valvoleStyle = new OpenLayers.Style();
 			valvoleStyle.addRules([
