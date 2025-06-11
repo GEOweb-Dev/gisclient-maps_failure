@@ -425,7 +425,6 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 				this.emptyDiv();
 			});
 			this.highlightCtrl.activate();
-			//debugger;
 		}
 		return resultLayer;
 	},
@@ -499,7 +498,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 				$.ajax({
 				type: "POST",
 				url: self.exportURL,
-				data: {"var": JSON.stringify(jsonIn), "operation" : index, "arg": arg}
+				data: {"var": JSON.stringify(jsonIn), "operation" : index, "arg": JSON.stringify(arg)}
 				}).done(function (res) {
 					const a = document.createElement('a');
 					a.style = 'display: none';
@@ -518,10 +517,33 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 					self.loadingControl.minimizeControl();
 				});
 			};
-			if(rr && text.toUpperCase()===clientConfig.JSON_REPORT_LABEL.toUpperCase())
+
+			if(rr && text.toUpperCase()===clientConfig.JSON_REPORT_LABEL.toUpperCase()){
 				clientConfig.JSON_REPORT_INPUT_FUNC(jsonIn,clickFailure,self.loadingControl,bangerang);
-			else
+			}else{
+				/*$.ajax({
+				type: "POST",
+				url: self.exportURL,
+				data: {"var": JSON.stringify(jsonIn), "operation" : index}
+				}).done(function (res) {
+					const a = document.createElement('a');
+					a.style = 'display: none';
+					document.body.appendChild(a);
+					const blob = new Blob([res], {type: 'octet/stream'});
+					const url = URL.createObjectURL(blob);
+					a.href = url;
+					a.download = 'output_'+text+'_'+(new Date().getTime())+'.csv';
+					a.click();
+					URL.revokeObjectURL(url);
+					clickFailure.activate();
+					self.loadingControl.minimizeControl();
+				}).fail(function (err) {
+					alert("ERRORE: " + err);
+					clickFailure.activate();
+					self.loadingControl.minimizeControl();
+				});*/
 				bangerang();
+			}
 		}
 	},
 	CLASS_NAME: "OpenLayers.Control.FailureSelect"
