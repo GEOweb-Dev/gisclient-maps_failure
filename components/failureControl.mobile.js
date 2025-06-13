@@ -543,7 +543,7 @@ OpenLayers.Control.FailureSelect = OpenLayers.Class(OpenLayers.Control, {
 					self.loadingControl.minimizeControl();
 				});*/
 				bangerang();
-			}
+			}		
 		}
 	},
 	CLASS_NAME: "OpenLayers.Control.FailureSelect"
